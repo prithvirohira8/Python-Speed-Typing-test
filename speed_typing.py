@@ -52,7 +52,7 @@ typing_accuracy1 = (count/len(res1))*100
 
 typing_accuracy2 = (1 - count2 / max(len(test_string), len(input_string))) * 100
 
-typing_accuracy = (0.8*typing_accuracy1)+(0.2*typing_accuracy2)
+typing_accuracy = (0.9*typing_accuracy1)+(0.1*typing_accuracy2)
 
 print("The no of words typed correctly are: {}".format(count))
 
