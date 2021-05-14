@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+        <!--<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>-->
+        <script
+  src="https://code.jquery.com/jquery-3.6.0.min.js"
+  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+  crossorigin="anonymous"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <style>
+            body{
+                background: url(/static/bgimg.jpg)  rgba(0, 0, 0, 0.8);
+                height: 100%;
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: cover;
+                margin-top: 300px;
+                background-blend-mode: multiply;
+                font-family: 'Poppins';
+                font-size: 22px;
+                color: white;
+            }
+            h1{
+                text-align: center;
+                margin-top: -150px;
+            }
+            input{
+                width: 50% !important;
+                border-radius: 0px !important;
+                //margin-left: 25%;
+                //margin-top: 45px;
+                opacity: 0.5;
+            }
+            input:focus{
+                outline: none !important;
+            }
+            .txt{
+                text-align: center;
+                color: white;
+                font-size: 18px;
+                margin-top: 25px;
+            }
+            #main{
+                text-align: center;
+                visibility: hidden;
+            }
+            .main1,.main2,.main4{
+                text-align: center;
+                visibility: hidden;
+            }
+            button{
+                height: 38px;
+                border-radius: 0px !important;
+            }
+            p{
+                font-size: 18px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Typing Speed Test</h1>
+        <p class="txt"></p>
+        <!--<p class="notify"></p>-->
+        <form>
+            <div style="display: flex; justify-content: center;margin-top: 25px;">
+            <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter the above text and press enter when done">
+            <button type="button" class="btn btn-primary">Finish</button>
+            </div>
+        </form>
+        <div style="display: flex;justify-content: space-evenly;margin-top: 40px;">
+        <p id="main">Words per minute: <span class="wpm"></span></p>
+        <p class="main1">Correct Words: <span class="cw"></span></p>
+        </div>
+        <div style="display: flex;justify-content: space-evenly;margin-top: 25px;">
+        <p class="main2">Accuracy: <span class="acc"></span></p>
+        <p class="main4">Incorrect/Missing Words: <span class="imw"></span></p>
+        </div>
+        <p style="text-align: center;margin-top: 40px;" class="main3"></p>
+        <script>
+        $(document).ready(function(){
+            var t=[];
+            var myArray = [
+            "Python is a fantastic programming language", "Java is an object oriented programming language",
+            "C++ has the fastest execution time for any program",
+            "Python is the most popular language"
+            ];
+
+            var randomItem = myArray[Math.floor(Math.random()*myArray.length)];
+
+            //document.p.innerHTML = randomItem;
+            $('.txt').text(randomItem);
+
+            //$("input").focus(function(){
+            //    $(".notify").text("Timer Initiated");
+            //});
+
+            $("input").keyup(function(){
+                var dt = new Date();
+                var time = dt.getHours() + ":" + dt.getMinutes() + ":" + dt.getSeconds();
+                t.push(time);
+            });
+
+            $("button").on("click", function(){
+                //alert(randomItem);
+                //alert(t[0]);
+                //alert(t[t.length-1]);
+                //alert($("input").val());
+                $.ajax({
+                    type: 'GET',
+                    url: '/result',
+                    data: {
+                        'typed_text': $("input").val(),
+                        'original_text': randomItem,
+                        'start_time': t[0],
+                        'end_time': t[t.length-1] 
+                    },
+                    datatype: "json",
+                    success: function(data){
+                        alert("Successful");
+                        var wpm = data.words_per_minute;
+                        var typing_accuracy = data.typing_accuracy;
+                        var correct_words = data.correct_words;
+                        var incorrect = data.incorrect_missing;
+                        console.log(Object.keys(data));
+                        console.log(data.incorrect_missing);
+                        $('.cw').text(correct_words);
+                        $('.wpm').text(wpm);
+                        $('.acc').text(typing_accuracy);
+                        var i;
+                        for(i=0;i<incorrect.length;i++)
+                        {
+                            $('.imw').append(incorrect[i]+", ");
+                        }
+
+                        if(wpm<30){
+                            $('.main3').text("The average person types at a speed of 30 words per minute, your typing speed is below average");
+                        }
+                        if(wpm>30 && wpm<75){
+                            $('.main3').text("The average person types at a speed of 30 words per minute, your typing speed is above average");
+                        }
+                        if(wpm==30){
+                            $('.main3').text("The average person types at a speed of 30 words per minute, your typing speed is average");
+                        }
+                        if(wpm>=75){
+                            $('.main3').text("Professional typists type at a speed of 75 words or more, you are a professional"); 
+                        }
+
+                        $('#main').css('visibility','visible');
+                        $('.main1').css('visibility','visible');
+                        $('.main2').css('visibility','visible');
+                        $('.main4').css('visibility','visible');
+                        //$('.imw').html(incorrect);
+                        //$('#main').html();
+                    }
+                });
+            });
+
+        });
+
+
+
+
+        </script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <!--<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script???>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    </body>
+</html>
